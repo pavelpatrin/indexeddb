@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>TestWebApp</title>
+
+    <!-- jQuery -->
+    <script type="text/javascript" src="assets/jquery/jquery-2.0.3.js"></script>
+
+    <!-- Twitter Bootstrap -->
+    <link type="text/css" rel="stylesheet" href="assets/bootstrap/bootstrap-3.0.0/css/bootstrap.min.css"/>
+    <link type="text/css" rel="stylesheet" href="assets/bootstrap/bootstrap-3.0.0/css/bootstrap-theme.min.css"/>
+    <script type="text/javascript" src="assets/bootstrap/bootstrap-3.0.0/js/bootstrap.min.js"></script>
+
+    <!-- Custom styles -->
+    <link type="text/css" rel="stylesheet" href="assets/app/css/style.css"/>
+
+    <script type="text/javascript" src="assets/app/js/Webapp.Storage.Driver.js"></script>
+    <script type="text/javascript" src="assets/app/js/Webapp.Storage.ModelMapper.js"></script>
+
+    <script type="text/javascript" src="assets/app/js/Webapp.Model.Abstract.js"></script>
+    <script type="text/javascript" src="assets/app/js/Webapp.Model.Brand.js"></script>
+    <script type="text/javascript" src="assets/app/js/Webapp.Model.Model.js"></script>
+    <script type="text/javascript" src="assets/app/js/Webapp.Model.Car.js"></script>
+
+    <script type="text/javascript" src="assets/app/js/Webapp.UI.BrandsList.js"></script>
+    <script type="text/javascript" src="assets/app/js/Webapp.UI.BrandsListEdit.js"></script>
+    <script type="text/javascript" src="assets/app/js/Webapp.UI.BrandsListCreate.js"></script>
+
+    <script type="text/javascript" src="assets/app/js/Webapp.UI.ModelsList.js"></script>
+    <script type="text/javascript" src="assets/app/js/Webapp.UI.ModelsListEdit.js"></script>
+    <script type="text/javascript" src="assets/app/js/Webapp.UI.ModelsListCreate.js"></script>
+
+    <script type="text/javascript" src="assets/app/js/Webapp.UI.CarsList.js"></script>
+    <script type="text/javascript" src="assets/app/js/Webapp.UI.CarsListEdit.js"></script>
+    <script type="text/javascript" src="assets/app/js/Webapp.UI.CarsListCreate.js"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            /**
+             * @type {{nameStorage: String, keyPath: String, autoIncrement: Boolean, constructor: function}[]}
+             */
+            var storageConfiguration = [
+                {
+                    nameStorage: 'brands',
+                    keyPath: 'id',
+                    autoIncrement: true,
+                    constructor: Webapp.Model.Brand
+                },
+                {
+                    nameStorage: 'models',
+                    keyPath: 'id',
+                    autoIncrement: true,
+                    constructor: Webapp.Model.Model
+                },
+                {
+                    nameStorage: 'cars',
+                    keyPath: 'id',
+                    autoIncrement: true,
+                    constructor: Webapp.Model.Car
+                }
+            ];
+
+            /* Asynchronous creation of storage driver */
+            Webapp.Storage.Driver.asyncCreate("webappdatabase", storageConfiguration, function (driver) {
+                /* Here we could manipulate IndexedDB database */
+                var mapper = new Webapp.Storage.ModelMapper(driver, storageConfiguration);
+
+                /* List and edit brands */
+                (function () {
+                    var widgetElement = $('[data-widget~="Webapp.UI.BrandsList"]').get(0);
+                    var widgetEditElement = $('[data-widget~="Webapp.UI.BrandsListEdit"]').get(0);
+                    var widgetCreateElement = $('[data-widget~="Webapp.UI.BrandsListCreate"]').get(0);
+
+                    var editBrandWidget = new Webapp.UI.BrandsListEdit($, mapper, widgetEditElement);
+                    var createBrandWidget = new Webapp.UI.BrandsListCreate($, mapper, widgetCreateElement);
+                    var brandsWidget = new Webapp.UI.BrandsList($, mapper, widgetElement, editBrandWidget, createBrandWidget);
+
+                    $('[data-role~="directory-brands-toggler"]').click(function (event) {
+                        brandsWidget.show();
+                    });
+                })();
+
+                /* List and edit models */
+                (function () {
+                    var widgetElement = $('[data-widget~="Webapp.UI.ModelsList"]').get(0);
+                    var widgetEditElement = $('[data-widget~="Webapp.UI.ModelsListEdit"]').get(0);
+                    var widgetCreateElement = $('[data-widget~="Webapp.UI.ModelsListCreate"]').get(0);
+
+                    var editModelWidget = new Webapp.UI.ModelsListEdit($, mapper, widgetEditElement);
+                    var createModelWidget = new Webapp.UI.ModelsListCreate($, mapper, widgetCreateElement);
+                    var modelsWidget = new Webapp.UI.ModelsList($, mapper, widgetElement, editModelWidget, createModelWidget);
+
+                    $('[data-role~="directory-models-toggler"]').click(function (event) {
+                        modelsWidget.show();
+                    });
+                })();
+
+                /* List and edit cars */
+                (function () {
+                    /** @type HTMLElement */
+                    var widgetElement = $('[data-widget~="Webapp.UI.CarsList"]').get(0);
+                    var widgetEditElement = $('[data-widget~="Webapp.UI.CarsListEdit"]').get(0);
+                    var widgetCreateElement = $('[data-widget~="Webapp.UI.CarsListCreate"]').get(0);
+
+                    var editCarWidget = new Webapp.UI.CarsListEdit($, mapper, widgetEditElement);
+                    var createCarWidget = new Webapp.UI.CarsListCreate($, mapper, widgetCreateElement);
+                    var carsWidget = new Webapp.UI.CarsList($, mapper, widgetElement, editCarWidget, createCarWidget);
+                })();
+            }, function (error) {
+                alert('Error accessing IndexedDB storage');
+            });
+        });
+    </script>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <ul class="nav nav-pills pull-right">
+            <li><a href="#" data-role="directory-brands-toggler" class="btn btn-primary">Brands</a></li>
+            <li><a href="#" data-role="directory-models-toggler" class="btn btn-primary">Models</a></li>
+        </ul>
+        <h3 class="text-muted">Webapp test project</h3>
+    </div>
+    <!-- Widget cars start -->
+    <div data-widget="Webapp.UI.CarsList">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th class="col-md-1">Id</th>
+                <th class="col-md-2">Brand</th>
+                <th class="col-md-2">Model</th>
+                <th class="col-md-2">Year</th>
+                <th class="col-md-2">Price</th>
+                <th class="col-md-3">Actions</th>
+            </tr>
+            </thead>
+            <tbody data-role="table-body">
+            <tr data-role="table-row">
+                <td data-role="car-id"></td>
+                <td data-role="brand-name"></td>
+                <td data-role="model-name"></td>
+                <td data-role="year"></td>
+                <td data-role="price"></td>
+                <td>
+                    <button type='button' class='btn btn-warning' data-role='edit-btn'>Edit</button>
+                    <button type='button' class='btn btn-danger' data-role='remove-btn'>Remove</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-default pull-right" data-role="create-btn">Create new car</button>
+    </div>
+    <!-- Widget cars end -->
+</div>
+
+<!-- Widget cars create start -->
+<div data-widget="Webapp.UI.CarsListCreate">
+    <div data-role="modal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Create new car</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="text-warning" data-role="error"></div>
+                    <span>Brand</span><br/>
+                    <select data-role="brand-id" class="form-control"></select>
+                    <span>Model</span><br/>
+                    <select data-role="model-id" class="form-control"/></select>
+                    <span>Year</span><br/>
+                    <input type="text" data-role="year" class="form-control"/>
+                    <span>Price</span><br/>
+                    <input type="text" data-role="price" class="form-control"/>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-role="save-btn">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Widget cars create end -->
+
+<!-- Widget cars edit start -->
+<div data-widget="Webapp.UI.CarsListEdit">
+    <div data-role="modal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Edit car <span data-role="car-id"></span></h4>
+                </div>
+                <div class="modal-body">
+                    <div class="text-warning" data-role="error"></div>
+                    <span>Brand</span><br/>
+                    <select data-role="brand-id" class="form-control"></select>
+                    <span>Model</span><br/>
+                    <select data-role="model-id" class="form-control"/></select>
+                    <span>Year</span><br/>
+                    <input type="text" data-role="year" class="form-control"/>
+                    <span>Price</span><br/>
+                    <input type="text" data-role="price" class="form-control"/>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-role="save-btn">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Widget cars edit end -->
+
+<!-- Widget brands start -->
+<div data-widget="Webapp.UI.BrandsList">
+    <div data-role="modal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Brands list</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th class="col-md-2">Id</th>
+                            <th class="col-md-6">Brand</th>
+                            <th class="col-md-4">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody data-role="table-body">
+                        <tr data-role="table-row">
+                            <td data-role="brand-id"></td>
+                            <td data-role="brand-name"></td>
+                            <td>
+                                <button type='button' class='btn btn-warning' data-role='edit-btn'>Edit</button>
+                                <button type='button' class='btn btn-danger' data-role='remove-btn'>Remove</button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-role="create-btn">Create new brand</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Widget brands end -->
+
+<!-- Widget brands form create -->
+<div data-widget="Webapp.UI.BrandsListCreate">
+    <div data-role="modal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Create new brand</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="text-warning" data-role="error"></div>
+                    <span>Brand</span><br/>
+                    <input type="text" data-role="brand-name" class="form-control"/>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-role="save-btn">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Widget brands form create end -->
+
+<!-- Widget brands form edit -->
+<div data-widget="Webapp.UI.BrandsListEdit">
+    <div data-role="modal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Edit brand <span data-role="brand-id"></span></h4>
+                </div>
+                <div class="modal-body">
+                    <div class="text-warning" data-role="error"></div>
+                    <span>Brand</span><br/>
+                    <input type="text" data-role="brand-name" class="form-control"/>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-role="save-btn">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Widget brands form edit end -->
+
+<!-- Widget models start -->
+<div data-widget="Webapp.UI.ModelsList">
+    <div data-role="modal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Models</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th class="col-md-2">Id</th>
+                            <th class="col-md-6">Model</th>
+                            <th class="col-md-4">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody data-role="table-body">
+                        <tr data-role="table-row">
+                            <td data-role="model-id"></td>
+                            <td data-role="model-name"></td>
+                            <td>
+                                <button type='button' class='btn btn-warning' data-role='edit-btn'>Edit</button>
+                                <button type='button' class='btn btn-danger' data-role='remove-btn'>Remove</button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-role="create-btn">Create new model</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Widget models end -->
+
+<!-- Widget models form create -->
+<div data-widget="Webapp.UI.ModelsListCreate">
+    <div data-role="modal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Create new model</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="text-warning" data-role="error"></div>
+                    <span>Model</span><br/>
+                    <input type="text" data-role="model-name" class="form-control"/>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-role="save-btn">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Widget models form create end -->
+
+<!-- Widget models form edit -->
+<div data-widget="Webapp.UI.ModelsListEdit">
+    <div data-role="modal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Edit model <span data-role="model-id"></span></h4>
+                </div>
+                <div class="modal-body">
+                    <div class="text-warning" data-role="error"></div>
+                    <span>Model</span><br/>
+                    <input type="text" data-role="model-name" class="form-control"/>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-role="save-btn">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Widget models form edit end -->
+</body>
+</html>
